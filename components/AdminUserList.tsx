@@ -258,7 +258,7 @@ export default function AdminUserList({
             <thead className="uppercase tracking-wider border-b border-stone-200/60 bg-stone-50/50">
               <tr>
                 <th className="px-6 py-4 text-stone-500 font-semibold text-xs">
-                  Email
+                  Số điện thoại
                 </th>
                 <th className="px-6 py-4 text-stone-500 font-semibold text-xs">
                   Vai trò
@@ -281,7 +281,7 @@ export default function AdminUserList({
                   className="hover:bg-stone-50/80 transition-colors"
                 >
                   <td className="px-6 py-4 font-medium text-stone-900">
-                    {user.email}
+                    {user.phone}
                   </td>
                   <td className="px-6 py-4">
                     <span
@@ -409,14 +409,14 @@ export default function AdminUserList({
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1">
-                    Email <span className="text-red-500">*</span>
+                    Số điện thoại <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="email"
-                    name="email"
+                    type="tel"
+                    name="phone"
                     required
                     className="w-full px-3 py-2 sm:py-2.5 bg-white text-stone-900 placeholder-stone-400 border border-stone-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-colors"
-                    placeholder="email@example.com"
+                    placeholder="0912345678"
                   />
                 </div>
 

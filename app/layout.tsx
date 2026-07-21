@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Playfair_Display, Roboto } from "next/font/google";
 import config from "./config";
 import "./globals.css";
 
-const inter = Inter({
+const roboto = Roboto({
   subsets: ["latin", "vietnamese"],
-  variable: "--font-inter",
+  weight: ["300", "400", "500", "700"],
+  variable: "--font-roboto",
 });
 const playfair = Playfair_Display({
   subsets: ["latin", "vietnamese"],
@@ -24,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased relative`}
+        className={`${roboto.variable} ${playfair.variable} font-sans antialiased relative`}
       >
         {children}
       </body>

@@ -1,6 +1,7 @@
 "use server";
 
 import { UserRole } from "@/types";
+import { phoneToAuthEmail } from "@/utils/phone";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -39,21 +40,21 @@ export async function deleteUser(userId: string) {
 }
 
 export async function adminCreateUser(formData: FormData) {
-  const email = formData.get("email")?.toString();
+  const phone = formData.get("phone")?.toString();
   const password = formData.get("password")?.toString();
   const role = formData.get("role")?.toString() || "member";
   const isActiveStr = formData.get("is_active")?.toString();
   const isActive = isActiveStr === "false" ? false : true;
 
-  if (!email || !password) {
-    throw new Error("Email và mật khẩu là bắt buộc.");
+  if (!phone || !password) {
+    throw new Error("Số điện thoại và mật khẩu là bắt buộc.");
   }
 
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
   const { error } = await supabase.rpc("admin_create_user", {
-    new_email: email,
+    new_email: phoneToAuthEmail(phone),
     new_password: password,
     new_role: role,
     new_active: isActive,

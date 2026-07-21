@@ -15,7 +15,7 @@ export interface Profile {
 
 export interface AdminUserData {
   id: string;
-  email: string;
+  phone: string;
   role: UserRole;
   is_active: boolean;
   created_at: string;

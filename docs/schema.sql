@@ -224,6 +224,12 @@ END;
 $$;
 
 -- 3. Auto-confirm first user (Email verification)
+-- NOTE: Users authenticate with a phone number, but the app maps it to a
+-- synthetic email (e.g. "84912345678@phone.giapha.local") and uses Supabase's
+-- native email/password auth under the hood — this avoids requiring a paid
+-- SMS provider just to accept a phone number as a login identifier.
+-- IMPORTANT: "Confirm email" MUST be disabled in Supabase Auth settings,
+-- since nobody can receive a confirmation email at a synthetic address.
 CREATE OR REPLACE FUNCTION public.handle_first_user_confirmation()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -280,7 +286,7 @@ CREATE POLICY "Users can delete avatars." ON storage.objects FOR DELETE USING ( 
 DROP TYPE IF EXISTS public.admin_user_data CASCADE;
 CREATE TYPE public.admin_user_data AS (
     id uuid,
-    email text,
+    phone text,
     role public.user_role_enum,
     created_at timestamptz,
     is_active boolean
@@ -299,7 +305,12 @@ BEGIN
     END IF;
 
     RETURN QUERY
-    SELECT au.id, au.email::text, p.role, au.created_at, p.is_active
+    SELECT
+        au.id,
+        -- Strip the synthetic "@phone.*" suffix and restore the leading 0
+        -- (e.g. "84912345678@phone.giapha.local" -> "0912345678").
+        regexp_replace(split_part(au.email, '@', 1), '^84', '0')::text AS phone,
+        p.role, au.created_at, p.is_active
     FROM auth.users au
     LEFT JOIN public.profiles p ON au.id = p.id
     ORDER BY au.created_at DESC;
@@ -348,9 +359,14 @@ $$;
 -- IMPORTANT: All token/string columns MUST be set to '' (empty string), NOT NULL.
 -- Supabase Auth's Go scanner crashes with "converting NULL to string is unsupported"
 -- if any of these fields are NULL.
+-- new_email here is the synthetic email the app derives from a phone number
+-- (see utils/phone.ts -> phoneToAuthEmail), not a real address.
+-- Dropped explicitly: CREATE OR REPLACE cannot rename parameters (new_phone -> new_email)
+-- when the argument types are unchanged.
+DROP FUNCTION IF EXISTS public.admin_create_user(text, text, text, boolean);
 CREATE OR REPLACE FUNCTION public.admin_create_user(
-  new_email text, 
-  new_password text, 
+  new_email text,
+  new_password text,
   new_role text,
   new_active boolean
 )
@@ -369,7 +385,7 @@ BEGIN
     new_id := gen_random_uuid();
 
     INSERT INTO auth.users (
-        id, instance_id, aud, role, email, encrypted_password, 
+        id, instance_id, aud, role, email, encrypted_password,
         email_confirmed_at,         -- Auto-verify: skip email confirmation
         confirmation_token,         -- Must be '' not NULL (Supabase Auth Go scanner)
         recovery_token,             -- Must be '' not NULL

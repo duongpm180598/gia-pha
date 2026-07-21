@@ -2,6 +2,7 @@ import config from "@/app/config";
 import DashboardHeader from "@/components/DashboardHeader";
 import Footer from "@/components/Footer";
 import LogoutButton from "@/components/LogoutButton";
+import { authEmailToPhone } from "@/utils/phone";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -87,7 +88,10 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col font-sans">
-      <DashboardHeader isAdmin={isAdmin} userEmail={user.email} />
+      <DashboardHeader
+        isAdmin={isAdmin}
+        userPhone={user.email ? authEmailToPhone(user.email) : undefined}
+      />
       {children}
       <Footer
         className="mt-auto bg-white border-t border-stone-200"

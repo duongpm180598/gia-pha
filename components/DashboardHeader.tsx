@@ -5,13 +5,13 @@ import React from "react";
 
 interface DashboardHeaderProps {
   isAdmin: boolean;
-  userEmail?: string;
+  userPhone?: string;
   children?: React.ReactNode;
 }
 
 export default function DashboardHeader({
   isAdmin,
-  userEmail,
+  userPhone,
   children,
 }: DashboardHeaderProps) {
   return (
@@ -26,7 +26,7 @@ export default function DashboardHeader({
         </div>
         <div className="flex items-center gap-4">
           {children}
-          <HeaderMenu isAdmin={isAdmin} userEmail={userEmail} />
+          <HeaderMenu isAdmin={isAdmin} userPhone={userPhone} />
         </div>
       </div>
     </header>

@@ -18,10 +18,10 @@ import LogoutButton from "./LogoutButton";
 
 interface HeaderMenuProps {
   isAdmin: boolean;
-  userEmail?: string;
+  userPhone?: string;
 }
 
-export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
+export default function HeaderMenu({ isAdmin, userPhone }: HeaderMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -43,8 +43,8 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
         className="flex items-center gap-2 pl-2 pr-4 py-1.5 rounded-full hover:bg-stone-100 transition-all duration-200 border border-transparent hover:border-stone-200"
       >
         <div className="size-8 rounded-full bg-linear-to-br from-amber-200 to-amber-100 text-amber-800 flex items-center justify-center font-bold shadow-sm ring-1 ring-amber-300/50">
-          {userEmail ? (
-            userEmail.charAt(0).toUpperCase()
+          {userPhone ? (
+            userPhone.charAt(0).toUpperCase()
           ) : (
             <UserCircle className="size-5" />
           )}
@@ -68,7 +68,7 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
                 Tài khoản
               </p>
               <p className="text-sm font-medium text-stone-900 truncate">
-                {userEmail}
+                {userPhone}
               </p>
             </div>
 
@@ -124,14 +124,6 @@ export default function HeaderMenu({ isAdmin, userEmail }: HeaderMenuProps) {
               >
                 <BarChart2 className="size-4" />
                 Thống kê gia phả
-              </Link>
-              <Link
-                href="/about"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-stone-700 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-              >
-                <Info className="size-4" />
-                Giới thiệu & Liên hệ
               </Link>
               <LogoutButton />
             </div>

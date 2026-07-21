@@ -3,12 +3,13 @@
 import config from "@/app/config";
 import Footer from "@/components/Footer";
 import { createClient } from "@/utils/supabase/client";
+import { phoneToAuthEmail } from "@/utils/phone";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   Info,
   KeyRound,
-  Mail,
+  Phone,
   Shield,
   UserPlus,
 } from "lucide-react";
@@ -17,22 +18,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDemo, setIsDemo] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hostname = window.location.hostname;
-      if (hostname === config.demoDomain) {
-        setIsDemo(true);
-        setEmail("giaphaos@homielab.com");
-        setPassword("giaphaos");
-      }
-    }
-  }, []);
 
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -47,10 +36,12 @@ export default function LoginPage() {
     setError(null);
     setSuccessMessage(null);
 
+    const authEmail = phoneToAuthEmail(phone);
+
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: authEmail,
           password,
         });
 
@@ -69,7 +60,7 @@ export default function LoginPage() {
 
         // 1. Try to sign up
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: authEmail,
           password,
         });
 
@@ -86,7 +77,7 @@ export default function LoginPage() {
           setError(error.message);
         } else if (data.user?.identities && data.user.identities.length === 0) {
           setError(
-            "Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác.",
+            "Số điện thoại này đã được đăng ký. Vui lòng đăng nhập hoặc dùng số khác.",
           );
         } else {
           if (data.session) {
@@ -96,7 +87,7 @@ export default function LoginPage() {
             // Attempt to sign in immediately (catches auto-confirmed first admin)
             const { data: signInData, error: signInError } =
               await supabase.auth.signInWithPassword({
-                email,
+                email: authEmail,
                 password,
               });
 
@@ -157,40 +148,29 @@ export default function LoginPage() {
                 ? "Đăng nhập để truy cập gia phả."
                 : "Tạo tài khoản thành viên mới."}
             </p>
-            {isDemo && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-3 bg-amber-50 border border-amber-200/60 rounded-xl"
-              >
-                <p className="text-[13px] font-semibold text-amber-800">
-                  Website Demo. Dữ liệu đều không có thật.
-                </p>
-              </motion.div>
-            )}
           </div>
 
           <form className="space-y-5 relative z-10" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="relative">
                 <label
-                  htmlFor="email-address"
+                  htmlFor="phone-number"
                   className="block text-[13px] font-semibold text-stone-600 mb-1.5 ml-1"
                 >
-                  Email
+                  Số điện thoại
                 </label>
                 <div className="relative flex items-center group">
-                  <Mail className="absolute left-3.5 size-5 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
+                  <Phone className="absolute left-3.5 size-5 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
                   <input
-                    id="email-address"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
+                    id="phone-number"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
                     required
                     className="bg-white/50 text-stone-900 placeholder-stone-400 block w-full rounded-xl border border-stone-200/80 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] focus:border-amber-400 focus:ring-amber-400 focus:bg-white pl-11 pr-4 py-3.5 transition-all duration-200 outline-none"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="0912345678"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
               </div>
@@ -345,14 +325,6 @@ export default function LoginPage() {
       >
         <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
         Trang chủ
-      </Link>
-
-      <Link
-        href="/about"
-        className="absolute top-6 right-6 z-20 flex items-center gap-2 text-stone-500 hover:text-stone-900 font-semibold text-sm transition-all duration-300 group bg-white/60 px-5 py-2.5 rounded-full backdrop-blur-md shadow-sm border border-stone-200 hover:border-stone-300 hover:shadow-md"
-      >
-        <Info className="size-4 group-hover:scale-110 transition-transform" />
-        Giới thiệu
       </Link>
 
       <Footer className="bg-transparent relative z-10 border-none mt-auto" />
