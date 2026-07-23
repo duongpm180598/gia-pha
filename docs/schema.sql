@@ -88,6 +88,16 @@ CREATE TABLE IF NOT EXISTS public.person_details_private (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- PUSH_SUBSCRIPTIONS (Web Push subscriptions for notification delivery)
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  endpoint TEXT NOT NULL UNIQUE,
+  p256dh TEXT NOT NULL,
+  auth_key TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- RELATIONSHIPS (Links between persons)
 CREATE TABLE IF NOT EXISTS public.relationships (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -125,6 +135,9 @@ CREATE INDEX IF NOT EXISTS idx_persons_birth_year ON public.persons(birth_year);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
 CREATE INDEX IF NOT EXISTS idx_profiles_is_active ON public.profiles(is_active);
 
+-- Push subscription lookups
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user_id ON public.push_subscriptions(user_id);
+
 -- ==========================================
 -- RLS POLICIES
 -- ==========================================
@@ -133,6 +146,7 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.persons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.person_details_private ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.relationships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Helper function to check if user is admin
 CREATE OR REPLACE FUNCTION public.is_admin()
@@ -178,6 +192,10 @@ CREATE POLICY "Enable read access for authenticated users" ON public.relationshi
 
 DROP POLICY IF EXISTS "Admins can manage relationships" ON public.relationships;
 CREATE POLICY "Admins can manage relationships" ON public.relationships FOR ALL TO authenticated USING (public.is_admin());
+
+-- PUSH_SUBSCRIPTIONS POLICIES (each user manages only their own subscriptions)
+DROP POLICY IF EXISTS "Users can manage own push subscriptions" ON public.push_subscriptions;
+CREATE POLICY "Users can manage own push subscriptions" ON public.push_subscriptions FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- ==========================================
 -- TRIGGERS

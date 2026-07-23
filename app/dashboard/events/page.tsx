@@ -1,6 +1,7 @@
 import { DashboardProvider } from "@/components/DashboardContext";
 import EventsList from "@/components/EventsList";
 import MemberDetailModal from "@/components/MemberDetailModal";
+import PushNotificationManager from "@/components/PushNotificationManager";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -37,7 +38,8 @@ export default async function EventsPage() {
           </p>
         </div>
 
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1 space-y-5">
+          <PushNotificationManager />
           <EventsList persons={persons ?? []} />
         </main>
       </div>
